@@ -1,98 +1,121 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+## 🧠 CodeHelper AI Agent (HNG Stage 3 Backend Task)
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+This project implements the **CodeHelper**, an expert $\text{AI}$ agent designed to assist developers on the **Telex.im** platform by executing code snippets and providing expert technical guidance. It serves as a real-time debugging and information tool.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+The agent is deployed as a high-performance backend service that complies with the **Agent-to-Agent ($\text{A2A}$) Protocol**.
 
-## Description
+### Key Technologies
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+  * **Backend Framework:** NestJS (TypeScript)
+  * **Agent Framework:** Mastra
+  * **LLM Provider:** Groq (using Llama 3.1-8b-instant for low-latency inference)
+  * **Integration Protocol:** $\text{JSON-RPC}$ 2.0 / **Telex $\text{A2A}$ Protocol**
+  * **Hosting:** Railway (or any public $\text{HTTPS}$ host)
 
-## Project setup
+-----
 
-```bash
-$ npm install
+## 🏗️ Architecture and Flow
+
+The application structure separates the $\text{AI}$ logic from the network interface to ensure modularity and clean protocol handling:
+
+1.  **A2aController:** This NestJS controller handles the $\text{HTTP}$ interface. It serves the **Agent Card** metadata (Discovery Endpoint) at `/.well-known/agent.json` and processes all incoming $\text{JSON-RPC}$ requests (Communication Endpoint) at `/:agentId`.
+2.  **MastraService:** This service acts as the orchestrator. It initializes the **Mastra Agent** and provides a wrapper method (`processMessage`) that takes the raw user text from the $\text{A2A}$ request and feeds it into the $\text{LLM}$'s generation process.
+3.  **CodeExecutor Tool:** This is a custom function (tool) defined within Mastra. The $\text{LLM}$ calls this tool when a user asks to run code. It securely executes the provided JavaScript/TypeScript snippet and returns the resulting value.
+4.  **Groq/Llama 3:** The Mastra framework routes the prompt and necessary context, including tool-use decisions, to the high-speed Groq $\text{API}$ for rapid reasoning and response generation.
+
+-----
+
+## ⚙️ Local Setup and Installation
+
+Follow these steps to get the project running on your local machine.
+
+### 1\. Prerequisites
+
+You must have the following installed:
+
+  * Node.js (v18+)
+  * npm or yarn
+  * NestJS CLI (`npm install -g @nestjs/cli`)
+
+### 2\. Clone the Repository and Install
+
+```
+git clone https://github.com/Dev-Faith/HNG-Stage-3.git
+cd HNG-Stage-3
+npm install
 ```
 
-## Compile and run the project
+### 3\. Configure Environment Variables
 
-```bash
-# development
-$ npm run start
+Create a file named **.env** in the project root and populate it with your credentials and configuration details. These must be set on your deployment platform as well.
 
-# watch mode
-$ npm run start:dev
+```
+# .env file
 
-# production mode
-$ npm run start:prod
+# 1. Groq API Key (Required for Llama 3)
+GROQ_API_KEY="gsk_YourCopiedKeyHere"
+
+# 2. Public URL (Used by the Agent Card JSON; use localhost for local testing)
+AGENT_PUBLIC_URL="http://localhost:3000"
+
+# 3. Agent Identifier (Must match the ID used in the A2aController)
+AGENT_ID="code-helper-agent"
 ```
 
-## Run tests
+### 4\. Run the Application
 
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+```
+npm run start:dev
 ```
 
-## Deployment
+The application will start on `http://localhost:3000`.
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+-----
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## 🧪 Local Testing (Thunder Client / Postman)
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+You must verify the $\text{A2A}$ protocol compliance locally before deployment.
+
+### 1\. Test Discovery Endpoint (GET)
+
+  * **URL:** `http://localhost:3000/.well-known/agent.json`
+  * **Verification:** Confirm the $\text{JSON}$ response contains all required fields, including the $\text{HTTPS}$ URL placeholder and the **`short_description`**.
+
+### 2\. Test Communication Endpoint (POST)
+
+Simulate a user message using a $\text{JSON-RPC}$ request.
+
+  * **Method:** $\text{POST}$
+  * **URL:** `http://localhost:3000/code-helper-agent`
+
+**Sample Request Body (JSON-RPC 2.0):**
+
+```json
+{
+    "jsonrpc": "2.0",
+    "method": "message/send",
+    "params": {
+        "channel_id": "test-channel-123",
+        "message": {
+            "text": "CodeHelper, what is the result of 99 + 1?"
+        }
+    },
+    "id": "123456"
+}
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+**Verification:** The response must be an $\text{HTTP}$ 200 with a $\text{JSON-RPC}$ payload that contains the agent's reply nested correctly under the **`result.actions`** structure and mirrors the original **`id`**.
 
-## Resources
+-----
 
-Check out a few resources that may come in handy when working with NestJS:
+## 🔗 Deployment and Telex Integration
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+### 1\. Deployment
 
-## Support
+Deploy the application to a public cloud host (e.g., Railway). **Crucially**, ensure the production environment variable `AGENT_PUBLIC_URL` is updated to your **$\text{HTTPS}$ domain** (e.g., `https://hng-stage-3-production-f2bf.up.railway.app`).
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### 2\. Telex Registration
 
-## Stay in touch
+Once deployed and confirmed to be using $\text{HTTPS}$, use the **Agent Discovery URL** to register the agent on the Telex platform:
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+  * **Registration URL:** `https://[Your-Deployed-Domain]/.well-known/agent.json`
