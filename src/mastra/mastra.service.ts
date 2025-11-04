@@ -34,6 +34,7 @@ export class MastraService {
         return {
             name: this.agent.name,
             description: this.agent.getDescription(),
+            short_description: this.agent.getDescription(),
             tools: Object.keys(this.agent.tools),
         };
     }
